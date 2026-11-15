@@ -18,7 +18,7 @@ def main():
     # Create TCP socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
-    # SO_REUSEADDR allows immediate port reuse after restarting the server
+    # SO_REUSEADDR allows port reuse after restarting the server
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
     s.bind((HOST, PORT))
@@ -35,7 +35,7 @@ def main():
             with lock:
                 CONNECTIONS[addr] = {"role": "admin"}
                 
-            # Spawn a new daemon thread to handle this client concurrently
+            # Spawn a new daemon thread to handle this client at the same time
             threading.Thread(target=handle, args=(sock, addr), daemon=True).start()
             
     except KeyboardInterrupt:

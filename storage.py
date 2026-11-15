@@ -1,9 +1,8 @@
 
 """
 Storage:
--------------------------------
 Handles directory initialization, thread-safe file operations, 
-metadata persistence, and logical file renaming.
+metadata, and logical file renaming.
 """
 
 import os

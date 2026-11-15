@@ -23,7 +23,7 @@ def handle(sock, addr):
                 lname = get_logical(orig)
                 path = os.path.join(STORAGE, lname)
                 
-                # Check if file already exists on server
+                # Check if file already exists
                 if os.path.exists(path):
                     sock.sendall(b"EXISTS")
                     if sock.recv(1024).decode('utf-8').strip().lower() != 'y':
@@ -43,12 +43,12 @@ def handle(sock, addr):
                         
                 sock.sendall(f"Saved as {lname}".encode('utf-8'))
 
-            # handles download
+            # Handles download
             elif msg.startswith("DOWNLOAD:"):
                 fname = msg.split(":")[1]
                 path = os.path.join(STORAGE, fname)
                 
-                # Fallback check if requested via original filename
+                # Check if requested with original filename
                 if not os.path.exists(path):
                     meta = load_meta()
                     path = next((os.path.join(STORAGE, l) for l, i in meta.items() if i["orig"] == fname), path)
