@@ -1,70 +1,48 @@
+ 
+"""
+Main Server Entry Point
+-----------------------
+Initializes storage, binds the TCP socket, and spawns 
+multithreaded worker threads for incoming client connections.
+"""
+
 import socket
-import sys
-import traceback
-from threading import Thread
+import threading
+from config import HOST, PORT
+from storage import init, CONNECTIONS, lock
+from handler import handle
 
 def main():
-    start_server()
-
-def start_server():
-    host = "127.0.0.1"
-    port = 8000
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print("Socket created")
+    # Setup directories and metadata
+    init()
+    
+    # Create TCP socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    # SO_REUSEADDR allows immediate port reuse after restarting the server
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
+    s.bind((HOST, PORT))
+    s.listen(10)
+    print(f"[SERVER STARTED] Listening on {HOST}:{PORT}")
     
     try:
-        soc.bind((host, port))
-    except:
-        print("Bind failed. Error : " + str(sys.exc_info()))
-        sys.exit()
-    
-    soc.listen(6)  # Queue up to 6 requests
-    print("Socket now listening")
-    
-    # Infinite loop for accepting connections
-    while True:
-        connection, address = soc.accept()
-        ip, port = str(address[0]), str(address[1])
-        print("Connected with " + ip + ":" + port)
-        
-        try:
-            Thread(target=client_thread, args=(connection, ip, port)).start()
-        except:
-            print("Thread did not start.")
-            traceback.print_exc()
-    
-    soc.close()
-
-def client_thread(connection, ip, port, max_buffer_size=5120):
-    is_active = True
-    
-    while is_active:
-        client_input = receive_input(connection, max_buffer_size)
-        
-        if "--quit--" in client_input.lower():
-            print("Client is requesting to quit")
-            connection.close()
-            print("Connection " + ip + ":" + port + " closed")
-            is_active = False
-        else:
-            print("Processed result: {}".format(client_input))
-            connection.sendall("-".encode("utf8"))
-
-def receive_input(connection, max_buffer_size):
-    client_input = connection.recv(max_buffer_size)
-    client_input_size = sys.getsizeof(client_input)
-    
-    if client_input_size > max_buffer_size:
-        print("Input size greater than expected: {}".format(client_input_size))
-    
-    decoded_input = client_input.decode("utf8").rstrip()
-    result = process_input(decoded_input)
-    return result
-
-def process_input(input_str):
-    print("Processing input from client")
-    return "Hello " + str(input_str).upper()
+        while True:
+            # Accept incoming client connections
+            sock, addr = s.accept()
+            print(f"[CONNECTION] Accepted connection from {addr[0]}:{addr[1]}")
+            
+            # Register client in connection pool with default authorization role
+            with lock:
+                CONNECTIONS[addr] = {"role": "admin"}
+                
+            # Spawn a new daemon thread to handle this client concurrently
+            threading.Thread(target=handle, args=(sock, addr), daemon=True).start()
+            
+    except KeyboardInterrupt:
+        print("\n[SHUTDOWN] Server shutting down gracefully...")
+    finally:
+        s.close()
 
 if __name__ == "__main__":
     main()
