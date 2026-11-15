@@ -9,7 +9,7 @@ metadata persistence, and logical file renaming.
 import os
 import json
 import threading
-from config import SERVER_STORAGE, METADATA_FILE
+from config import STORAGE, METADATA_FILE
 
 # Global lock to prevent race conditions during multithreaded metadata updates
 lock = threading.Lock()
@@ -19,7 +19,7 @@ CONNECTIONS = {}
 
 def init():
     """Ensure the local storage directory and metadata tracking file exist."""
-    os.makedirs(SERVER_STORAGE, exist_ok=True)
+    os.makedirs(STORAGE, exist_ok=True)
     if not os.path.exists(METADATA_FILE):
         with open(METADATA_FILE, "w") as f:
             json.dump({}, f)
