@@ -62,16 +62,16 @@ def get_logical(orig):
     meta = load_meta()
     
     # Return existing logical name if this file was already uploaded
-    for l, info in METADATA_FILE.items():
+    for l, info in meta.items():
         if info["orig"] == orig:
             return l
             
     # Calculate next sequence number for this prefix
-    existing_indices = [int(k[2:5]) for k in METADATA_FILE if k.startswith(prefix) and k[2:5].isdigit()]
+    existing_indices = [int(k[2:5]) for k in meta if k.startswith(prefix) and k[2:5].isdigit()]
     idx = max(existing_indices, default=0) + 1
     
     name = f"{prefix}{idx:03d}{ext}"
-    METADATA_FILE[name] = {"orig": orig}
-    save_meta(METADATA_FILE)
+    meta[name] = {"orig": orig}
+    save_meta(meta)
     
     return name
