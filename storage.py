@@ -35,7 +35,7 @@ def load_meta():
                     return {}
         return {}
 
-def save_meta(METADATA_FILE):
+def save_meta(metadata):
     """Safely write updated metadata back to disk."""
     with lock:
         with open(METADATA_FILE, "w") as f:
@@ -59,7 +59,7 @@ def get_logical(orig):
     else:
         prefix = "DS"
         
-    METADATA_FILE = load_meta()
+    meta = load_meta()
     
     # Return existing logical name if this file was already uploaded
     for l, info in METADATA_FILE.items():
