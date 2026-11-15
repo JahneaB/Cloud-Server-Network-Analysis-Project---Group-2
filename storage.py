@@ -1,6 +1,6 @@
 
 """
-Storage and Metadata Management
+Storage:
 -------------------------------
 Handles directory initialization, thread-safe file operations, 
 metadata persistence, and logical file renaming.
@@ -25,7 +25,7 @@ def init():
             json.dump({}, f)
 
 def load_meta():
-    """Safely load metadata from the JSON file using a thread lock."""
+    """load metadata from the JSON file using a thread lock."""
     with lock:
         if os.path.exists(METADATA_FILE):
             with open(METADATA_FILE, "r") as f:
@@ -36,10 +36,10 @@ def load_meta():
         return {}
 
 def save_meta(metadata):
-    """Safely write updated metadata back to disk."""
+    """ writes updated metadata back to disk."""
     with lock:
         with open(METADATA_FILE, "w") as f:
-            json.dump(METADATA_FILE, f, indent=4)
+            json.dump(metadata, f, indent=4)
 
 def get_logical(orig):
     """
@@ -47,7 +47,6 @@ def get_logical(orig):
     - TS: Text / Code files (.txt, .py, .json, etc.)
     - VS: Video files (.mp4, .avi, etc.)
     - DS: General / Data files (all other formats)
-    Example: First text file uploaded becomes 'TS001.txt'.
     """
     ext = os.path.splitext(orig)[1].lower()
     

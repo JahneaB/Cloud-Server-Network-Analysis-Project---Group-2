@@ -1,6 +1,6 @@
 
 """
-Client Session & Protocol Handler
+Handler:
 ---------------------------------
 Parses and executes commands sent by client.py:
 UPLOAD, DOWNLOAD, DIR, SUBFOLDER, and DELETE.
@@ -103,7 +103,7 @@ def handle(sock, addr):
                     sock.sendall(b"Subfolder deleted successfully.")
 
             # ----------------------------------
-            # 5. FILE DELETION (Auth Check)
+            # 5. FILE DELETION (authorization)
             # ----------------------------------
             elif msg.startswith("DELETE:"):
                 # Authorization: ensure client has admin role
